@@ -24,6 +24,7 @@ func main() {
 		Private: github.Bool(true),
 	}
 	repo, _, err := client.Repositories.Create(ctx, "", repo)
+	fmt.Printf("err=%v | type=%T", err, err)
 	must.NoError(ctx, err)
 
 	fmt.Printf("HTMLURL: %v\n", repo.GetHTMLURL())
