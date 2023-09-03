@@ -9,26 +9,29 @@ import (
 )
 
 type gitHubVendor struct {
-	accessToken string
+	client *github.Client
 }
 
-func NewGitHubVendor(accessToken string) vendor4git.Vendor {
-	return &gitHubVendor{accessToken: accessToken}
-}
-
-func (x *gitHubVendor) CreateRepo(ctx context.Context, name string, owner string, private bool) (*vendor4git.Repository, error) {
-
+func NewGitHubVendor(ctx context.Context, accessToken string) vendor4git.Vendor {
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: x.accessToken},
+		&oauth2.Token{AccessToken: accessToken},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
+	return NewGithubVendorWithClient(ctx, client)
+}
+
+func NewGithubVendorWithClient(ctx context.Context, client *github.Client) vendor4git.Vendor {
+	return &gitHubVendor{client: client}
+}
+
+func (x *gitHubVendor) CreateRepo(ctx context.Context, name string, owner string, private bool) (*vendor4git.Repository, error) {
 
 	repo := &github.Repository{
 		Name:    github.String(name),
 		Private: github.Bool(private),
 	}
-	repo, _, err := client.Repositories.Create(ctx, owner, repo)
+	repo, _, err := x.client.Repositories.Create(ctx, owner, repo)
 	errResp, ok := err.(*github.ErrorResponse)
 	if ok && errResp.Response.StatusCode == 422 {
 		return nil, vendor4git.ErrRepoExists
@@ -45,13 +48,7 @@ func (x *gitHubVendor) CreateRepo(ctx context.Context, name string, owner string
 
 func (x *gitHubVendor) RemoveRepo(ctx context.Context, name string, owner string) error {
 
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: x.accessToken},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
-
-	_, err := client.Repositories.Delete(ctx, owner, name)
+	_, err := x.client.Repositories.Delete(ctx, owner, name)
 	ghErr, ok := err.(*github.ErrorResponse)
 	if ghErr != nil && ok && ghErr.Response.StatusCode == 404 {
 		return vendor4git.ErrRepoNotFound
