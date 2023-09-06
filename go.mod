@@ -3,7 +3,7 @@ module github.com/gov4git/vendor4git
 go 1.19
 
 require (
-	github.com/google/go-github/v54 v54.0.0
+	github.com/google/go-github/v55 v55.0.0
 	github.com/gov4git/lib4git v0.0.22
 	golang.org/x/oauth2 v0.11.0
 )
