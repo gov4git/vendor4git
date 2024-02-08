@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/google/go-github/v55/github"
+	"github.com/google/go-github/v58/github"
 	"github.com/gov4git/lib4git/must"
 	"golang.org/x/oauth2"
 )
